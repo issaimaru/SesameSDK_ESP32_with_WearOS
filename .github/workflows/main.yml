@@ -1,0 +1,102 @@
+name: Notify to traQ
+
+on:
+  push:
+  pull_request:
+    types: [opened, edited, closed]
+  issues:
+    types: [opened, edited, closed]
+  release:
+    types: [released]
+
+jobs:
+  notify-traq:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify on push
+        if: github.event_name == 'push'
+        uses: issaimaru/traq-webhook@v1.0
+        with:
+          webhook-id: ${{ secrets.WEBHOOK_ID }}
+          auto-generate-message: false
+          message: |
+            🚀 **Push detected**
+            Repository: https://github.com/${{ github.repository }}
+            User: ${{ github.actor }}
+            Branch: ${{ github.ref_name }}
+
+      - name: Notify PR Opened
+        if: github.event_name == 'pull_request' && github.event.action == 'opened'
+        uses: issaimaru/traq-webhook@v1.0
+        with:
+          webhook-id: ${{ secrets.WEBHOOK_ID }}
+          auto-generate-message: false
+          message: |
+            🆕 **Pull Request Opened**
+            Repo: https://github.com/${{ github.repository }}
+            Title: ${{ github.event.pull_request.title }}
+            Author: ${{ github.actor }}
+
+      # PR Edited
+      - name: Notify PR Edited
+        if: github.event_name == 'pull_request' && github.event.action == 'edited'
+        uses: issaimaru/traq-webhook@v1.0
+        with:
+          webhook-id: ${{ secrets.WEBHOOK_ID }}
+          auto-generate-message: false
+          message: |
+            ✏️ **Pull Request Edited**
+            Repo: https://github.com/${{ github.repository }}
+            Title: ${{ github.event.pull_request.title }}
+            Editor: ${{ github.actor }}
+
+      # PR Merged
+      - name: Notify PR Merged
+        if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
+        uses: issaimaru/traq-webhook@v1.0
+        with:
+          webhook-id: ${{ secrets.WEBHOOK_ID }}
+          auto-generate-message: false
+          message: |
+            ✅ **Pull Request Merged**
+            Repo: https://github.com/${{ github.repository }}
+            Title: ${{ github.event.pull_request.title }}
+            Merged by: ${{ github.actor }}
+
+      # PR Closed without Merge
+      - name: Notify PR Closed (Not Merged)
+        if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged != true
+        uses: issaimaru/traq-webhook@v1.0
+        with:
+          webhook-id: ${{ secrets.WEBHOOK_ID }}
+          auto-generate-message: false
+          message: |
+            ❌ **Pull Request Closed without Merge**
+            Repo: https://github.com/${{ github.repository }}
+            Title: ${{ github.event.pull_request.title }}
+            Closed by: ${{ github.actor }}
+
+
+      - name: Notify on issue
+        if: github.event_name == 'issues'
+        uses: issaimaru/traq-webhook@v1.0
+        with:
+          webhook-id: ${{ secrets.WEBHOOK_ID }}
+          auto-generate-message: false
+          message: |
+            📝 **Issue ${{ github.event.action }}**
+            Repository: https://github.com/${{ github.repository }}
+            Title: ${{ github.event.issue.title }}
+            User: ${{ github.actor }}
+
+      - name: Notify on release
+        if: github.event_name == 'release'
+        uses: issaimaru/traq-webhook@v1.0
+        with:
+          webhook-id: ${{ secrets.WEBHOOK_ID }}
+          auto-generate-message: false
+          message: |
+            📦 **New Release Published**
+            Repository: https://github.com/${{ github.repository }}
+            Release: ${{ github.event.release.name }}
+            Published by: ${{ github.actor }}
