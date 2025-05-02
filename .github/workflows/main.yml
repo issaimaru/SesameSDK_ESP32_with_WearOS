@@ -1,5 +1,3 @@
-name: Notify to traQ
-
 on:
   push:
   pull_request:
@@ -9,8 +7,10 @@ on:
   release:
     types: [released]
 
+permissions: read-all
+
 jobs:
-  notify-traq:
+  webhook:
     runs-on: ubuntu-latest
     steps:
       - name: Notify on push
@@ -18,24 +18,24 @@ jobs:
         uses: issaimaru/traq-webhook@v1.0
         with:
           webhook-id: ${{ secrets.WEBHOOK_ID }}
-          auto-generate-message: false
           message: |
             🚀 **Push detected**
             Repository: https://github.com/${{ github.repository }}
             User: ${{ github.actor }}
             Branch: ${{ github.ref_name }}
+          auto-generate-message: false
 
       - name: Notify PR Opened
         if: github.event_name == 'pull_request' && github.event.action == 'opened'
         uses: issaimaru/traq-webhook@v1.0
         with:
           webhook-id: ${{ secrets.WEBHOOK_ID }}
-          auto-generate-message: false
           message: |
             🆕 **Pull Request Opened**
             Repo: https://github.com/${{ github.repository }}
             Title: ${{ github.event.pull_request.title }}
             Author: ${{ github.actor }}
+          auto-generate-message: false
 
       # PR Edited
       - name: Notify PR Edited
@@ -43,12 +43,12 @@ jobs:
         uses: issaimaru/traq-webhook@v1.0
         with:
           webhook-id: ${{ secrets.WEBHOOK_ID }}
-          auto-generate-message: false
           message: |
             ✏️ **Pull Request Edited**
             Repo: https://github.com/${{ github.repository }}
             Title: ${{ github.event.pull_request.title }}
             Editor: ${{ github.actor }}
+          auto-generate-message: false
 
       # PR Merged
       - name: Notify PR Merged
@@ -56,12 +56,12 @@ jobs:
         uses: issaimaru/traq-webhook@v1.0
         with:
           webhook-id: ${{ secrets.WEBHOOK_ID }}
-          auto-generate-message: false
           message: |
             ✅ **Pull Request Merged**
             Repo: https://github.com/${{ github.repository }}
             Title: ${{ github.event.pull_request.title }}
             Merged by: ${{ github.actor }}
+          auto-generate-message: false
 
       # PR Closed without Merge
       - name: Notify PR Closed (Not Merged)
@@ -69,12 +69,12 @@ jobs:
         uses: issaimaru/traq-webhook@v1.0
         with:
           webhook-id: ${{ secrets.WEBHOOK_ID }}
-          auto-generate-message: false
           message: |
             ❌ **Pull Request Closed without Merge**
             Repo: https://github.com/${{ github.repository }}
             Title: ${{ github.event.pull_request.title }}
             Closed by: ${{ github.actor }}
+          auto-generate-message: false
 
 
       - name: Notify on issue
@@ -82,21 +82,21 @@ jobs:
         uses: issaimaru/traq-webhook@v1.0
         with:
           webhook-id: ${{ secrets.WEBHOOK_ID }}
-          auto-generate-message: false
           message: |
             📝 **Issue ${{ github.event.action }}**
             Repository: https://github.com/${{ github.repository }}
             Title: ${{ github.event.issue.title }}
             User: ${{ github.actor }}
+          auto-generate-message: false
 
       - name: Notify on release
         if: github.event_name == 'release'
         uses: issaimaru/traq-webhook@v1.0
         with:
           webhook-id: ${{ secrets.WEBHOOK_ID }}
-          auto-generate-message: false
           message: |
             📦 **New Release Published**
             Repository: https://github.com/${{ github.repository }}
             Release: ${{ github.event.release.name }}
             Published by: ${{ github.actor }}
+          auto-generate-message: false
