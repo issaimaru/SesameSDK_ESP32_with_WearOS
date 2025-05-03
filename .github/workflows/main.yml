@@ -1,5 +1,4 @@
 on:
-  push:
   pull_request:
     types: [opened, edited, closed]
   issues:
@@ -13,20 +12,6 @@ jobs:
   webhook:
     runs-on: ubuntu-latest
     steps:
-      - name: Notify on push
-        if: github.event_name == 'push'
-        uses: issaimaru/traq-webhook@v1.0
-        with:
-          webhook-id: ${{ secrets.WEBHOOK_ID }}
-          message: |
-            🚀 **Push detected**
-            Repository: https://github.com/${{ github.repository }}
-            User: ${{ github.actor }}
-            Branch: ${{ github.ref_name }}
-            Commits:
-            ${{ join(github.event.commits.*.message, '\n- ') }}
-          auto-generate-message: false
-
       - name: Notify PR Opened
         if: github.event_name == 'pull_request' && github.event.action == 'opened'
         uses: issaimaru/traq-webhook@v1.0
