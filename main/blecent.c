@@ -113,7 +113,8 @@ static int ble_gap_connect_event(struct ble_gap_event * event, void * arg) {
 
 static void ssm_scan_connect(const struct ble_hs_adv_fields * fields, void * disc) {
     ble_addr_t * addr = &((struct ble_gap_disc_desc *) disc)->addr;
-    if (((struct ble_gap_disc_desc *) disc)->rssi < -60) { // RSSI threshold
+    int rssi = ((struct ble_gap_disc_desc *) disc)->rssi;
+    if (!fields->mfg_data) {
         return;
     }
     if (fields->mfg_data_len >= 5 && fields->mfg_data[0] == 0x5A && fields->mfg_data[1] == 0x05) { // is SSM
@@ -125,8 +126,15 @@ static void ssm_scan_connect(const struct ble_hs_adv_fields * fields, void * dis
                 p_ssms_env->ssm.conn_id = 0xFF;
             }
         } else { // registered SSM
-            ESP_LOGI(TAG, "find registered SSM[%d]", fields->mfg_data[2]);
-            return;
+            ESP_LOGI(TAG, "find registered SSM[%d] addr=%s rssi=%d", fields->mfg_data[2], addr_str(addr->val), rssi);
+            if (p_ssms_env->ssm.device_status == SSM_NOUSE) {
+                if (memcmp(p_ssms_env->ssm.addr, addr->val, 6) == 0) {
+                    p_ssms_env->ssm.device_status = SSM_DISCONNECTED;
+                    p_ssms_env->ssm.conn_id = 0xFF;
+                } else {
+                    return;
+                }
+            }
         }
     } else {
         return; // not SSM

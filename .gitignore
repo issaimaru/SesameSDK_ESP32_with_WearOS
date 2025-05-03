@@ -2,3 +2,4 @@
 /sdkconfig.old
 /.vscode
 /ze_build.sh
+/main/secrets.h
