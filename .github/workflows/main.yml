@@ -23,6 +23,8 @@ jobs:
             Repository: https://github.com/${{ github.repository }}
             User: ${{ github.actor }}
             Branch: ${{ github.ref_name }}
+            Commits:
+            ${{ join(github.event.commits.*.message, '\n- ') }}
           auto-generate-message: false
 
       - name: Notify PR Opened
